@@ -1,0 +1,42 @@
+name: Watched Successfully ✅
+
+on:
+ schedule:
+    - cron: "*/5 * * * *"
+ workflow_dispatch:
+ push:
+    branches:
+      - master
+
+concurrency:
+   group: watched 
+   cancel-in-progress: true
+
+jobs:
+  fetch_and_upload:
+    runs-on: ubuntu-latest
+    name: Fetch JSON and Upload via rclone
+    steps:
+      - name: Fetch JSON with Curl
+        run: |
+          curl -H "Content-Type: application/json" \
+               -H "trakt-api-version: 2" \
+               -H "trakt-api-key: ${{ secrets.TRAKT_API_KEY }}" \
+               https://api.trakt.tv/users/adityazu/watched/movies \
+               -o watched.json
+
+      - name: Debug JSON Content
+        run: |
+          cat watched.json 
+
+      - name: Install rclone
+        run: |
+          curl https://rclone.org/install.sh | sudo bash
+
+      - name: Configure Rclone
+        run: |
+          echo '${{ secrets.RCLONE_CONFIG }}' > rclone.conf
+
+      - name: Upload JSON to Cloud Storage
+        run: |
+          rclone copy watched.json ab:Arc.BiHU.0x/0x/0x/JSON --config rclone.conf

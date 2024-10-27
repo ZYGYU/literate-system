@@ -1,0 +1,42 @@
+name: Liked Track
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+  schedule:
+    - cron: '* * * * *'  # Adjust this cron schedule as needed
+
+concurrency:
+   group: liked
+   cancel-in-progress: true
+
+jobs:
+  save-and-upload:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Install required packages
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y curl rclone
+
+    - name: Save webpage to text file
+      run: |
+        curl -s https://adityaspotify.wordpress.com/feed/ > Liked.xml
+
+    - name: Install rclone
+      run: |
+       curl https://rclone.org/install.sh | sudo bash
+
+    - name: Configure Rclone
+      run: |
+       echo '${{ secrets.RCLONE_CONFIG }}' > rclone.conf
+
+    - name: Upload file to Rclone
+      run: |
+        rclone copy Liked.xml ab:Arc.BiHU.0x/0x/0x/XML --config rclone.conf
