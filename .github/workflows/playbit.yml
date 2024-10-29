@@ -1,0 +1,41 @@
+name: Tumblr Successfully ✅
+
+on:
+ schedule:
+    - cron: "*/120 * * * *"
+ workflow_dispatch:
+ push:
+    branches:
+      - master
+      
+concurrency:
+   group: Tumblr
+   cancel-in-progress: true
+
+jobs:
+  fetch_and_upload:
+    runs-on: ubuntu-latest
+    name: Fetch JSON and Upload via rclone
+    steps:
+      - name: Fetch JSON with Curl
+        run: |
+          curl -s https://main.super-tech.site/ID.json > ID.json
+          curl -s https://main.super-tech.site/SP.json > SP.json
+               
+      - name: Debug JSON Content
+        run: |
+          cat SP.json
+          cat ID.json
+
+      - name: Install rclone
+        run: |
+          curl https://rclone.org/install.sh | sudo bash
+
+      - name: Configure Rclone
+        run: |
+          echo '${{ secrets.RCLONE_CONFIG }}' > rclone.conf
+
+      - name: Upload JSON to Cloud Storage
+        run: |
+          rclone copy ID.json ab:Arc.BiHU.0x/0x/0x/JSON --config rclone.conf
+          rclone copy SP.json ab:Arc.BiHU.0x/0x/0x/JSON --config rclone.conf
