@@ -1,0 +1,35 @@
+name: Spotify to MEGA
+
+on:
+  workflow_dispatch: # Allows manual trigger
+  schedule:
+    - cron: '0 * * * *' # Adjust this to your preferred time (UTC)
+
+jobs:
+  sync-music:
+    runs-on: self-hosted
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Run Spotify to MEGA Script
+        run: |
+          # Variables
+          SPOTIFY_ARCHIVE="spotify_playlist.txt"
+          SPOTIFY_PLAYLIST_URL="https://open.spotify.com/playlist/21yqmD9oVk0ah2n6Lob2zu"
+          MUSIC_DIR="$HOME/music"
+          RCLONE_REMOTE="mg:music"
+
+          # Ensure directories exist
+          mkdir -p "$MUSIC_DIR"
+
+          # Download Spotify Playlist
+          spotdl download "$SPOTIFY_PLAYLIST_URL" \
+            --bitrate 128k \
+            --archive "$SPOTIFY_ARCHIVE" \
+            --output "$MUSIC_DIR/{artists} - {title}.{output-ext}"
+
+          # Upload to MEGA using Rclone
+          rclone copy "$MUSIC_DIR" "$RCLONE_REMOTE" \
+            --transfers 2 \
+            --progress --ignore-existing
