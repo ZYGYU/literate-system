@@ -3,7 +3,7 @@ name: Spotify to MEGA
 on:
   workflow_dispatch: # Allows manual trigger
   schedule:
-    - cron: '0 * * * *' # Adjust this to your preferred time (UTC)
+    - cron: '*/5 * * * *' # Adjust this to your preferred time (UTC)
 
 jobs:
   sync-music:
