@@ -3,7 +3,7 @@ name: Spotify to MEGA
 on:
   workflow_dispatch: # Allows manual trigger
   schedule:
-    - cron: '*/5 * * * *' # Adjust this to your preferred time (UTC)
+    - cron: '*/1 * * * *' # Adjust this to your preferred time (UTC)
 
 concurrency:
   group: spotify-to-mega # Unique identifier for this workflow's concurrency group
