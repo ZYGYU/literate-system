@@ -28,6 +28,7 @@ jobs:
     - name: Save webpage to text file
       run: |
         curl -s https://adityaspotify.wordpress.com/feed/ > Liked.xml
+        curl -s https://eresesepic.tumblr.com/rss > EGS.xml
 
     - name: Install rclone
       run: |
@@ -40,3 +41,4 @@ jobs:
     - name: Upload file to Rclone
       run: |
         rclone copy Liked.xml ab:Arc.BiHU.0x/0x/0x/XML --config rclone.conf
+        rclone copy EGS.xml ab:Arc.BiHU.0x/0x/0x/XML --config rclone.conf
