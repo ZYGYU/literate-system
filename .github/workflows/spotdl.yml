@@ -18,6 +18,9 @@ jobs:
          pip install spotdl
          spotdl --download-ffmpeg
          
+      - name: Setup yt-dlp
+        uses: AnimMouse/setup-yt-dlp@v3
+    
       - name: Configure Rclone
         run: |
          echo '${{ secrets.RCLONE_CONFIG }}' > rclone.conf
