@@ -18,9 +18,6 @@ jobs:
          pip install spotdl
          spotdl --download-ffmpeg
          
-      - name: Setup yt-dlp
-        uses: AnimMouse/setup-yt-dlp@v3
-    
       - name: Configure Rclone
         run: |
          echo '${{ secrets.RCLONE_CONFIG }}' > rclone.conf
@@ -39,6 +36,7 @@ jobs:
           # Download Spotify Playlist
           spotdl download "$SPOTIFY_PLAYLIST_URL" \
             --bitrate 128k \
+            --log-level DEBUG \
             --archive "$SPOTIFY_ARCHIVE" \
             --output "$MUSIC_DIR/{artists} - {title}.{output-ext}"
 
@@ -47,3 +45,4 @@ jobs:
             --transfers 2 \
             --progress --ignore-existing \
             --config rclone.conf
+      
