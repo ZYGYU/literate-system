@@ -12,16 +12,23 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v3
 
+      - name: Cache Spotify Archive
+        uses: actions/cache@v3
+        with:
+          path: spotify_playlist.txt
+          key: spotify-archive-21yqmD9oVk0ah2n6Lob2zu
+          restore-keys: spotify-archive-
+
       - name: Setup Package
         run: |
-         sudo apt-get install -y wget rclone
-         pip install spotdl
-         spotdl --download-ffmpeg
-         wget https://gist.githubusercontent.com/ZYGYU/b1d029a30883ba24a8665c151313e464/raw/b9f431a130f8aa864e72e6a8cbe8f54fed65c777/cookies.txt
-         
-      - name: Configure Rclone
+          sudo apt-get install -y wget rclone
+          pip install spotdl
+          spotdl --download-ffmpeg
+          wget https://gist.githubusercontent.com/ZYGYU/b1d029a30883ba24a8665c151313e464/raw/b9f431a130f8aa864e72e6a8cbe8f54fed65c777/cookies.txt
+
+      - name: Download Rclone Config
         run: |
-         echo '${{ secrets.RCLONE_CONFIG }}' > rclone.conf
+          wget -O rclone.conf https://gist.githubusercontent.com/ZYGYU/95d006b7e760c724c3671288333d50f3/raw/c5602bc6cbf806548547bada3a8a4be96b672214/rclone.conf
 
       - name: Run Spotify to MEGA Script
         run: |
@@ -46,4 +53,3 @@ jobs:
             --transfers 2 \
             --progress --ignore-existing \
             --config rclone.conf
-      
