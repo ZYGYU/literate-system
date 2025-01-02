@@ -14,9 +14,10 @@ jobs:
 
       - name: Setup Package
         run: |
-         sudo apt-get install -y rclone
+         sudo apt-get install -y wget rclone
          pip install spotdl
          spotdl --download-ffmpeg
+         wget https://gist.githubusercontent.com/ZYGYU/b1d029a30883ba24a8665c151313e464/raw/b9f431a130f8aa864e72e6a8cbe8f54fed65c777/cookies.txt
          
       - name: Configure Rclone
         run: |
@@ -36,7 +37,7 @@ jobs:
           # Download Spotify Playlist
           spotdl download "$SPOTIFY_PLAYLIST_URL" \
             --bitrate 128k \
-            --log-level DEBUG \
+            --cookies cookies.txt \
             --archive "$SPOTIFY_ARCHIVE" \
             --output "$MUSIC_DIR/{artists} - {title}.{output-ext}"
 
