@@ -37,7 +37,7 @@ jobs:
           # Download Spotify Playlist
           spotdl download "$SPOTIFY_PLAYLIST_URL" \
             --bitrate 128k \
-            --cookies cookies.txt \
+            --cookie-file cookies.txt \
             --archive "$SPOTIFY_ARCHIVE" \
             --output "$MUSIC_DIR/{artists} - {title}.{output-ext}"
 
