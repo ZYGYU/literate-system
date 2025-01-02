@@ -7,10 +7,19 @@ on:
 
 jobs:
   sync-music:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
+
+      - name: Setup Package
+        run: |
+         sudo apt-get install -y rclone
+         pip install spotdl
+       
+      - name: Configure Rclone
+        run: |
+         echo '${{ secrets.RCLONE_CONFIG }}' > rclone.conf
 
       - name: Run Spotify to MEGA Script
         run: |
@@ -32,4 +41,5 @@ jobs:
           # Upload to MEGA using Rclone
           rclone copy "$MUSIC_DIR" "$RCLONE_REMOTE" \
             --transfers 2 \
-            --progress --ignore-existing
+            --progress --ignore-existing \
+            --config rclone.conf
