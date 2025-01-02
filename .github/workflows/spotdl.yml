@@ -16,7 +16,8 @@ jobs:
         run: |
          sudo apt-get install -y rclone
          pip install spotdl
-       
+         spotdl --download-ffmpeg
+         
       - name: Configure Rclone
         run: |
          echo '${{ secrets.RCLONE_CONFIG }}' > rclone.conf
