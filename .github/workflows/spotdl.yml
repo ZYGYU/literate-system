@@ -21,7 +21,8 @@ jobs:
 
       - name: Setup Package
         run: |
-          sudo apt-get install -y wget rclone
+          sudo apt-get install -y wget curl
+          sudo -v ; curl https://rclone.org/install.sh | sudo bash -s beta
           pip install spotdl
           spotdl --download-ffmpeg
           wget https://gist.githubusercontent.com/ZYGYU/b1d029a30883ba24a8665c151313e464/raw/b9f431a130f8aa864e72e6a8cbe8f54fed65c777/cookies.txt
