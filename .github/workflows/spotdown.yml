@@ -1,0 +1,63 @@
+name: Spotify to MEGA
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '*/30 * * * *'
+
+jobs:
+  sync-music:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Cache Spotify Archive
+        uses: actions/cache@v3
+        with:
+          path: spotify_playlist.txt
+          key: spotify-archive-21yqmD9oVk0ah2n6Lob2zu
+          restore-keys: spotify-archive-
+
+      - name: Setup Package
+        run: |
+          sudo apt-get install -y wget curl
+          sudo -v ; curl https://rclone.org/install.sh | sudo bash -s beta
+          pip install spotdl
+          spotdl --download-ffmpeg
+
+      - name: Load Rclone Config from Secret
+        run: |
+          echo "$RCLONE_CONF_BASE64" | base64 --decode > rclone.conf
+        env:
+          RCLONE_CONF_BASE64: ${{ secrets.RCLONE_CONF_BASE64 }}
+
+      - name: Load Cookies File from Secret
+        run: |
+          echo "$COOKIES_TXT_BASE64" | base64 --decode > cookies.txt
+        env:
+          COOKIES_TXT_BASE64: ${{ secrets.COOKIES_TXT_BASE64 }}
+
+      - name: Run Spotify to MEGA Script
+        run: |
+          # Variables
+          SPOTIFY_ARCHIVE="spotify_playlist.txt"
+          SPOTIFY_PLAYLIST_URL="https://open.spotify.com/playlist/21yqmD9oVk0ah2n6Lob2zu"
+          MUSIC_DIR="$HOME/music"
+          RCLONE_REMOTE="mg:music"
+
+          # Ensure directories exist
+          mkdir -p "$MUSIC_DIR"
+
+          # Download Spotify Playlist
+          spotdl download "$SPOTIFY_PLAYLIST_URL" \
+            --bitrate 128k \
+            --cookie-file cookies.txt \
+            --archive "$SPOTIFY_ARCHIVE" \
+            --output "$MUSIC_DIR/{artists} - {title}.{output-ext}"
+
+          # Upload to MEGA using Rclone
+          rclone copy "$MUSIC_DIR" "$RCLONE_REMOTE" \
+            --transfers 2 \
+            --progress --ignore-existing \
+            --config rclone.conf
