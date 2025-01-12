@@ -37,7 +37,7 @@ jobs:
           SPOTIFY_PLAYLIST_URL="https://open.spotify.com/playlist/21yqmD9oVk0ah2n6Lob2zu"
           MUSIC_DIR="$HOME/music"
           RCLONE_REMOTE="mg:music"
-          ARCHIVE_FILE="$GITHUB_WORKSPACE/archive.txt"
+          ARCHIVE_FILE="archive.txt"
           TELEGRAM_BOT_TOKEN="${{ secrets.TELEGRAM_BOT_TOKEN }}"
           TELEGRAM_CHAT_ID="${{ secrets.TELEGRAM_CHAT_ID }}"
 
@@ -58,7 +58,6 @@ jobs:
             --config rclone.conf
 
           # Create or update archive.txt
-          ls "$MUSIC_DIR" >> "$GITHUB_WORKSPACE/$ARCHIVE_FILE"
           git config --global user.name "GitHub Action"
           git config --global user.email "action@github.com"
           git add "$ARCHIVE_FILE"
