@@ -38,6 +38,8 @@ jobs:
           MUSIC_DIR="$HOME/music"
           RCLONE_REMOTE="mg:music"
           ARCHIVE_FILE="archive.txt"
+          TELEGRAM_BOT_TOKEN="${{ secrets.TELEGRAM_BOT_TOKEN }}"
+          TELEGRAM_CHAT_ID="${{ secrets.TELEGRAM_CHAT_ID }}"
 
           # Ensure directories exist
           mkdir -p "$MUSIC_DIR"
@@ -45,7 +47,6 @@ jobs:
           # Download Spotify Playlist
           spotdl download "$SPOTIFY_PLAYLIST_URL" \
             --bitrate 128k \
-            --archive "$ARCHIVE_FILE" \
             --cookie-file cookies.txt \
             --output "$MUSIC_DIR/{artists} - {title}.{output-ext}"
 
@@ -62,3 +63,13 @@ jobs:
             --transfers 2 \
             --progress --ignore-existing \
             --config rclone.conf
+
+          # Upload audio files to Telegram
+          for audio in "$MUSIC_DIR"/*; do
+            if [[ -f "$audio" ]]; then
+              curl -X POST "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendAudio" \
+                -F "chat_id=$TELEGRAM_CHAT_ID" \
+                -F "audio=@$audio" \
+                -F "caption=$(basename "$audio")"
+            fi
+          done
