@@ -44,6 +44,7 @@ jobs:
           SPOTIFY_ARCHIVE="spotify_playlist.txt"
           SPOTIFY_PLAYLIST_URL="https://open.spotify.com/playlist/21yqmD9oVk0ah2n6Lob2zu"
           MUSIC_DIR="$HOME/music"
+          ARCHIVE_FILE="archived.txt"
           RCLONE_REMOTE="mg:music"
           TELEGRAM_BOT_TOKEN="${{ secrets.TELEGRAM_BOT_TOKEN }}"
           TELEGRAM_CHAT_ID="${{ secrets.TELEGRAM_CHAT_ID }}"
@@ -64,25 +65,33 @@ jobs:
             --progress --ignore-existing \
             --config rclone.conf
 
-          ls -l $MUSIC_DIR
-
-          # Check if MUSIC_DIR is not empty and send audio files to Telegram
-          if [ "$(ls -A $MUSIC_DIR)" ]; then
-            echo "Sending audio files to Telegram..."
-            for file in "$MUSIC_DIR"/*; do
-              if [ -f "$file" ]; then
-                echo "Sending file: $file"
-                response=$(curl -s -X POST "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendAudio" \
-                  -F "chat_id=$TELEGRAM_CHAT_ID" \
-                  -F "audio=@$file")
-
-                if [ $? -ne 0 ]; then
-                  echo "Failed to send $file to Telegram"
-                else
-                  echo "Response: $response"
-                fi
-              fi
-            done
-          else
-            echo "No audio files found in $MUSIC_DIR. Skipping Telegram upload."
+          # Check if music directory is empty
+          if [ -z "$(ls -A "$MUSIC_DIR")" ]; then
+            echo "No files in $MUSIC_DIR, skipping Telegram upload."
+            exit 0
           fi
+
+          # Upload files to Telegram and update archived.txt
+          touch "$ARCHIVE_FILE"
+          for file in "$MUSIC_DIR"/*; do
+            if [ -f "$file" ]; then
+              # Upload file to Telegram
+              curl -X POST "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendAudio" \
+                -F "chat_id=$TELEGRAM_CHAT_ID" \
+                -F "audio=@$file"
+              
+              # Add file name to archived.txt
+              echo "$(basename "$file")" >> "$ARCHIVE_FILE"
+            fi
+          done
+
+          # Move archived.txt to repository
+          mv "$ARCHIVE_FILE" ./archived.txt
+          
+      - name: Commit Archived File
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+          git add archived.txt
+          git commit -m "Update archived.txt with uploaded files"
+          git push
