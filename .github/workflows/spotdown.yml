@@ -50,7 +50,6 @@ jobs:
 
           # Ensure directories exist
           mkdir -p "$MUSIC_DIR"
-          cat spotify_playlist.txt
 
           # Download Spotify Playlist
           spotdl download "$SPOTIFY_PLAYLIST_URL" \
@@ -64,6 +63,8 @@ jobs:
             --transfers 2 \
             --progress --ignore-existing \
             --config rclone.conf
+
+          ls -l $MUSIC_DIR
 
           # Check if MUSIC_DIR is not empty and send audio files to Telegram
           if [ "$(ls -A $MUSIC_DIR)" ]; then
