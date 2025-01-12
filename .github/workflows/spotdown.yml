@@ -57,6 +57,14 @@ jobs:
             --progress --ignore-existing \
             --config rclone.conf
 
+          # Create or update archive.txt
+          ls "$MUSIC_DIR" >> "$GITHUB_WORKSPACE/$ARCHIVE_FILE"
+          git config --global user.name "GitHub Action"
+          git config --global user.email "action@github.com"
+          git add "$ARCHIVE_FILE"
+          git commit -m "Update archive with downloaded Spotify songs"
+          git push
+          
           # Upload audio files to Telegram
           for file in "$MUSIC_DIR"/*; do
               if [ -f "$file" ]; then
