@@ -64,7 +64,7 @@ jobs:
                       echo "File $BASENAME already uploaded, skipping."
                   else
                       echo "Uploading $BASENAME to Telegram..."
-                      curl -X POST "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendAudio" \
+                      sudo curl -X POST "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendAudio" \
                         -F "chat_id=$TELEGRAM_CHAT_ID" \
                         -F "audio=@$file"
                       
