@@ -41,7 +41,7 @@ jobs:
             --cookie-file cookies.txt \
             --output "$MUSIC_DIR/{artists} - {title}.{output-ext}"
 
-      - name: Upload Music to Telegram by File Name
+      - name: Upload Music to Telegram by File Name with Delay
         run: |
           # Variables
           MUSIC_DIR="$HOME/music"
@@ -74,6 +74,10 @@ jobs:
                       else
                           echo "Failed to upload $BASENAME."
                       fi
+
+                      # Add delay before uploading the next file
+                      echo "Waiting for 2 seconds before the next upload..."
+                      sleep 2
                   fi
               else
                   echo "Invalid file: $file"
