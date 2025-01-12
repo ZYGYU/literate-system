@@ -72,7 +72,6 @@ jobs:
                         -F "audio=@$file"
                       
                       if [ $? -eq 0 ]; then
-                          echo "$BASENAME" >> "$ARCHIVE_FILE"
                           echo "Successfully uploaded $BASENAME."
                       else
                           echo "Failed to upload $BASENAME."
