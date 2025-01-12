@@ -64,20 +64,23 @@ jobs:
             --progress --ignore-existing \
             --config rclone.conf
 
-          # Send audio files to Telegram without caption
-          for file in "$MUSIC_DIR"/*; do
-            if [ -f "$file" ]; then
-              echo "Sending file: $file"
-              response=$(curl -s -X POST "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendAudio" \
-                -F "chat_id=$TELEGRAM_CHAT_ID" \
-                -F "audio=@$file" 2>&1)
+          # Check if MUSIC_DIR is not empty and send audio files to Telegram
+          if [ "$(ls -A $MUSIC_DIR)" ]; then
+            echo "Sending audio files to Telegram..."
+            for file in "$MUSIC_DIR"/*; do
+              if [ -f "$file" ]; then
+                echo "Sending file: $file"
+                response=$(curl -s -X POST "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendAudio" \
+                  -F "chat_id=$TELEGRAM_CHAT_ID" \
+                  -F "audio=@$file")
 
-              if [ $? -ne 0 ]; then
-                echo "Failed to send $file to Telegram. Error: $response"
-              else
-                echo "File sent: $file"
+                if [ $? -ne 0 ]; then
+                  echo "Failed to send $file to Telegram"
+                else
+                  echo "Response: $response"
+                fi
               fi
-            else
-              echo "File not found: $file. Skipping."
-            fi
-          done
+            done
+          else
+            echo "No audio files found in $MUSIC_DIR. Skipping Telegram upload."
+          fi
