@@ -50,6 +50,7 @@ jobs:
 
           # Ensure directories exist
           mkdir -p "$MUSIC_DIR"
+          cat spotify_playlist.txt
 
           # Download Spotify Playlist
           spotdl download "$SPOTIFY_PLAYLIST_URL" \
