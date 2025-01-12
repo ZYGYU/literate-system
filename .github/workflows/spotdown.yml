@@ -68,9 +68,13 @@ jobs:
           # Upload audio files to Telegram
           for audio in "$MUSIC_DIR"/*; do
             if [[ -f "$audio" ]]; then
+              # Get the basename of the audio file
+              audio_basename=$(basename "$audio")
+              
+              # Upload to Telegram
               curl -X POST "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendAudio" \
                 -F "chat_id=$TELEGRAM_CHAT_ID" \
                 -F "audio=@$audio" \
-                -F "caption=$(basename "$audio")"
+                -F "caption=$audio_basename"
             fi
           done
