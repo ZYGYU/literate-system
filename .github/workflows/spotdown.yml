@@ -45,6 +45,8 @@ jobs:
           SPOTIFY_PLAYLIST_URL="https://open.spotify.com/playlist/21yqmD9oVk0ah2n6Lob2zu"
           MUSIC_DIR="$HOME/music"
           RCLONE_REMOTE="mg:music"
+          TELEGRAM_BOT_TOKEN="${{ secrets.TELEGRAM_BOT_TOKEN }}"
+          TELEGRAM_CHAT_ID="${{ secrets.TELEGRAM_CHAT_ID }}"
 
           # Ensure directories exist
           mkdir -p "$MUSIC_DIR"
@@ -61,3 +63,12 @@ jobs:
             --transfers 2 \
             --progress --ignore-existing \
             --config rclone.conf
+
+          # Send audio files to Telegram without caption
+          for file in "$MUSIC_DIR"/*; do
+            if [ -f "$file" ]; then
+              curl -X POST "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendAudio" \
+                -F "chat_id=$TELEGRAM_CHAT_ID" \
+                -F "audio=@$file"
+            fi
+          done
