@@ -37,7 +37,7 @@ jobs:
           SPOTIFY_PLAYLIST_URL="https://open.spotify.com/playlist/21yqmD9oVk0ah2n6Lob2zu"
           MUSIC_DIR="$HOME/music"
           RCLONE_REMOTE="mg:music"
-          ARCHIVE_FILE="archive.txt"
+          ARCHIVE_FILE="$GITHUB_WORKSPACE/archive.txt"
           TELEGRAM_BOT_TOKEN="${{ secrets.TELEGRAM_BOT_TOKEN }}"
           TELEGRAM_CHAT_ID="${{ secrets.TELEGRAM_CHAT_ID }}"
 
@@ -51,14 +51,6 @@ jobs:
             --cookie-file cookies.txt \
             --output "$MUSIC_DIR/{artists} - {title}.{output-ext}"
 
-          # Create or update archive.txt
-          ls "$MUSIC_DIR" >> "$GITHUB_WORKSPACE/$ARCHIVE_FILE"
-          git config --global user.name "GitHub Action"
-          git config --global user.email "action@github.com"
-          git add "$ARCHIVE_FILE"
-          git commit -m "Update archive with downloaded Spotify songs"
-          git push
-
           # Upload to MEGA using Rclone
           rclone copy "$MUSIC_DIR" "$RCLONE_REMOTE" \
             --transfers 2 \
@@ -66,15 +58,27 @@ jobs:
             --config rclone.conf
 
           # Upload audio files to Telegram
-          for audio in "$MUSIC_DIR"/*; do
-            if [[ -f "$audio" ]]; then
-              # Get the basename of the audio file
-              audio_basename=$(basename "$audio")
-              
-              # Upload to Telegram
-              curl -X POST "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendAudio" \
-                -F "chat_id=$TELEGRAM_CHAT_ID" \
-                -F "audio=@$audio" \
-                -F "caption=$audio_basename"
-            fi
+          for file in "$MUSIC_DIR"/*; do
+              if [ -f "$file" ]; then
+                  BASENAME=$(basename "$file")
+  
+                  # Check if file is already archived
+                  if grep -Fxq "$BASENAME" "$ARCHIVE_FILE"; then
+                      echo "File $BASENAME already uploaded, skipping."
+                  else
+                      echo "Uploading $BASENAME to Telegram..."
+                      curl -X POST "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendAudio" \
+                        -F "chat_id=$TELEGRAM_CHAT_ID" \
+                        -F "audio=@$file"
+                      
+                      if [ $? -eq 0 ]; then
+                          echo "$BASENAME" >> "$ARCHIVE_FILE"
+                          echo "Successfully uploaded $BASENAME."
+                      else
+                          echo "Failed to upload $BASENAME."
+                      fi
+                  fi
+              else
+                  echo "Invalid file: $file"
+              fi
           done
