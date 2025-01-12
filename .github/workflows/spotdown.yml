@@ -67,8 +67,17 @@ jobs:
           # Send audio files to Telegram without caption
           for file in "$MUSIC_DIR"/*; do
             if [ -f "$file" ]; then
-              curl -X POST "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendAudio" \
+              echo "Sending file: $file"
+              response=$(curl -s -X POST "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendAudio" \
                 -F "chat_id=$TELEGRAM_CHAT_ID" \
-                -F "audio=@$file"
+                -F "audio=@$file" 2>&1)
+
+              if [ $? -ne 0 ]; then
+                echo "Failed to send $file to Telegram. Error: $response"
+              else
+                echo "File sent: $file"
+              fi
+            else
+              echo "File not found: $file. Skipping."
             fi
           done
