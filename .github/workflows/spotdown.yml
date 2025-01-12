@@ -73,6 +73,7 @@ jobs:
 
           # Upload files to Telegram and update archived.txt
           touch "$ARCHIVE_FILE"
+          cd "$MUSIC_DIR"
           for file in "$MUSIC_DIR"/*; do
             if [ -f "$file" ]; then
               # Upload file to Telegram
